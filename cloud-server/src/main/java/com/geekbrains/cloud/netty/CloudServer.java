@@ -1,6 +1,5 @@
 package com.geekbrains.cloud.netty;
 
-import com.geekbrains.cloud.netty.handler.CloudFileHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -15,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class CloudServer {
+    private DbAuthenticationProvider dbAuthenticationProvider;
 
     public CloudServer() {
 
@@ -22,6 +22,7 @@ public class CloudServer {
         EventLoopGroup worker = new NioEventLoopGroup();
 
         try {
+            // подключаем базу данных
 
             ServerBootstrap server = new ServerBootstrap();
             server.group(auth, worker)
@@ -40,11 +41,15 @@ public class CloudServer {
             ChannelFuture future = server.bind(8189).sync();
             log.debug("Server is ready");
             future.channel().closeFuture().sync();
+            dbAuthenticationProvider = new DbAuthenticationProvider();
+            dbAuthenticationProvider.init();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             auth.shutdownGracefully();
             worker.shutdownGracefully();
+            // отключаем базу данных
+            BdConnect.disconnect();
         }
     }
 

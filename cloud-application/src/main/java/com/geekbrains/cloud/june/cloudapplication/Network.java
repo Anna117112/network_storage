@@ -22,6 +22,7 @@ public class Network {
         return (CloudMessage) is.readObject();
     }
 
+
     public void write(CloudMessage msg) throws IOException {
         os.writeObject(msg);
         os.flush();
